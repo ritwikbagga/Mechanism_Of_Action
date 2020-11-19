@@ -12,11 +12,11 @@ from sklearn.model_selection import  train_test_split as train_test_split
 
 
 def load_data():
-    Train_featues = pd.read_csv('Data/train_features.csv')
+    Train_featues = pd.read_csv('../Data/train_features.csv')
 
-    Train_targets_scored = pd.read_csv("Data/train_targets_scored.csv")
-    Train_targets_nonscored =  pd.read_csv("Data/train_targets_nonscored.csv")
-    Test_features = pd.read_csv("Data/test_features.csv")
+    Train_targets_scored = pd.read_csv("../Data/train_targets_scored.csv")
+    Train_targets_nonscored =  pd.read_csv("../Data/train_targets_nonscored.csv")
+    Test_features = pd.read_csv("../Data/test_features.csv")
 
     #return other files
 
