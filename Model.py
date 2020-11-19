@@ -104,7 +104,7 @@ def test(model, device, test_loader):
 
 def main():
     Train_featues, Train_targets_scored, Test_features = load_data()
-    Train_targets_scored.drop("sig_id" , axis= 1)   #shape (23814,207 )
+    Train_targets_scored= Train_targets_scored.drop("sig_id" , axis= 1)   #shape (23814,207 )
     Train_featues = preprocess(Train_featues)      # shape (23814, 880)
     Test_features = preprocess(Test_features)
 
@@ -118,14 +118,19 @@ def main():
     batch_size = 32
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    tensor_x = torch.tensor(Train_featues.to_array(), device=device)
-    tensor_y = torch.tensor(Train_targets_scored.to_array(), dtype=torch.long, device=device)
+    tensor_x = torch.tensor(train_data.iloc[:, :].values, device=device)
+    tensor_y = torch.tensor(train_target.iloc[:, :].values, device=device)
+
+
+    test_tensor_x = torch.tensor(Train_featues.iloc[:, :].values, device=device)
+    test_tensor_y = torch.tensor(Test_features.iloc[:, :].values, dtype=torch.long)
 
     train_dataset = utils.TensorDataset(tensor_x, tensor_y)  # create your datset
     train_loader = utils.DataLoader(train_dataset, batch_size=batch_size)  # create your dataloader
 
-    test_dataset = utils.TensorDataset(Train_featues, Train_targets_scored)  # create your datset
+    test_dataset = utils.TensorDataset(test_tensor_x, test_tensor_y)  # create your datset
     test_loader = utils.DataLoader(test_dataset)
+
 
     model = SeqModel().to(device)
     optimizer = optim.Adam(model.parameters(), lr=learning_rate) #add weight decay?
