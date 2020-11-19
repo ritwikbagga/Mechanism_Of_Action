@@ -75,22 +75,22 @@ def train(model, device, train_loader, optimizer, epoch):
         if batch_idx % 100 == 0: #Print loss every 100 batch
             print('Train Epoch: {}\tLoss: {:.6f}'.format(
                 epoch, loss.item()))
-    accuracy = test(model, device, train_loader)
-    return accuracy
+    Loss = test(model, device, train_loader)
+    return Loss
 
-# def test(model, device, test_loader):
-#     model.eval()
-#     correct = 0
-#     with torch.no_grad():
-#         for data, target in test_loader:
-#             data, target = data.to(device), target.to(device)
-#             output = model(data)
-#             pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
-#             correct += pred.eq(target.view_as(pred)).sum().item()
-#
-#     accuracy = 100. * correct / len(test_loader.dataset)
-#
-#     return accuracy
+def test(model, device, test_loader):
+    model.eval()
+    Final_loss = 0
+    with torch.no_grad():
+        for data, target in test_loader:
+            data, target = data.to(device), target.to(device)
+            output = model(data)
+            loss = nn.BCEWithLogitsLoss()(output, target)
+            Final_loss += loss.item()
+
+    return Final_loss
+
+
 
 
 
@@ -118,18 +118,18 @@ def main():
     batch_size = 1024
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    tensor_x = torch.tensor(train_data.iloc[:, :].values, device=device)
-    tensor_y = torch.tensor(train_target.iloc[:, :].values,dtype=torch.long,  device=device)
+    tensor_x = torch.tensor(train_data.iloc[:, :].values,dtype=torch.float, device=device)
+    tensor_y = torch.tensor(train_target.iloc[:, :].values,dtype=torch.float,  device=device)
 
 
-    # test_tensor_x = torch.tensor(Train_featues.iloc[:, :].values, device=device)
-    # test_tensor_y = torch.tensor(Test_features.iloc[:, :].values, dtype=torch.long)
+    test_tensor_x = torch.tensor(valid_data.iloc[:, :].values,dtype=torch.float, device=device)
+    test_tensor_y = torch.tensor(valid_target.iloc[:, :].values,dtype=torch.float)
 
     train_dataset = utils.TensorDataset(tensor_x, tensor_y)  # create your datset
     train_loader = utils.DataLoader(train_dataset, batch_size=batch_size)  # create your dataloader
 
-    # test_dataset = utils.TensorDataset(test_tensor_x, test_tensor_y)  # create your datset
-    # test_loader = utils.DataLoader(test_dataset)
+    test_dataset = utils.TensorDataset(test_tensor_x, test_tensor_y)  # create your datset
+    test_loader = utils.DataLoader(test_dataset)
 
     # print(train_data.shape)
     # print(train_target.shape)
@@ -137,20 +137,26 @@ def main():
     model = SeqModel(879, 206).to(device)
     optimizer = optim.Adam(model.parameters(), lr=learning_rate) #add weight decay?
 
-    train_acc_list = []
-    test_acc_list = []
+    train_Loss_list = []
+    test_Loss_list = []
     epoch_list = []
     for epoch in range(NumEpochs):
         epoch_list.append(epoch)
-        train_acc = train(model, device, train_loader, optimizer, epoch)
-        train_acc_list.append(train_acc)
-        print('\nTrain set Accuracy: {:.1f}%\n'.format(train_acc))
-        # test_acc = test(model, device, test_loader)
-        # print('\nTest set Accuracy: {:.1f}%\n'.format(test_acc))
-        # test_acc_list.append(test_acc)
+        train_loss = train(model, device, train_loader, optimizer, epoch)
+        train_Loss_list.append(train_loss)
+        print('\nTrain set Loss: {:.1f}%\n'.format(train_loss))
+        test_loss = test(model, device, test_loader)
+        print('\nTest set Loss: {:.1f}%\n'.format(test_loss))
+        test_Loss_list.append(test_loss)
 
-
-
+    #Plot train and test accuracy vs epoch
+    plt.figure("Train and Test Loss vs Epoch")
+    plt.plot(epoch_list, train_Loss_list, c='r', label="Train Loss")
+    plt.plot(epoch_list, test_Loss_list, c='g', label="Test Loss")
+    plt.ylabel("Loss")
+    plt.xlabel("Number of Epochs")
+    plt.legend(loc=0)
+    plt.show()
 
 
 
