@@ -88,18 +88,7 @@ def test(model, device, test_loader):
             loss = nn.BCEWithLogitsLoss()(output, target)
             Final_loss += loss.item()
 
-    return Final_loss
-
-
-
-
-
-
-
-
-
-
-
+    return Final_loss/ len(test_loader)
 
 
 def main():
