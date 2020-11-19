@@ -46,7 +46,7 @@ class SeqModel(nn.Module):
         self.model = nn.Sequential(
             nn.Linear(num_features, 1024),
             nn.BatchNorm1d(1024),
-            nn.Dropout(0.3).
+            nn.Dropout(0.3),
             nn.PReLU(),
             nn.Linear(1024,1024),
             nn.BatchNorm1d(1024),
@@ -57,7 +57,7 @@ class SeqModel(nn.Module):
         )
 
     def forward(self, x):
-        self.model(x)
+        x= self.model(x.float())
         return x
 
 
@@ -69,7 +69,7 @@ def train(model, device, train_loader, optimizer, epoch):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
-        loss = F.cross_entropy(output, target)
+        loss = nn.BCEWithLogitsLoss()(output, target)
         loss.backward()
         optimizer.step()
         if batch_idx % 100 == 0: #Print loss every 100 batch
@@ -78,19 +78,19 @@ def train(model, device, train_loader, optimizer, epoch):
     accuracy = test(model, device, train_loader)
     return accuracy
 
-def test(model, device, test_loader):
-    model.eval()
-    correct = 0
-    with torch.no_grad():
-        for data, target in test_loader:
-            data, target = data.to(device), target.to(device)
-            output = model(data)
-            pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
-            correct += pred.eq(target.view_as(pred)).sum().item()
-
-    accuracy = 100. * correct / len(test_loader.dataset)
-
-    return accuracy
+# def test(model, device, test_loader):
+#     model.eval()
+#     correct = 0
+#     with torch.no_grad():
+#         for data, target in test_loader:
+#             data, target = data.to(device), target.to(device)
+#             output = model(data)
+#             pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+#             correct += pred.eq(target.view_as(pred)).sum().item()
+#
+#     accuracy = 100. * correct / len(test_loader.dataset)
+#
+#     return accuracy
 
 
 
@@ -115,24 +115,26 @@ def main():
     use_cuda= False
     learning_rate = 0.01
     NumEpochs = 10
-    batch_size = 32
+    batch_size = 1024
     device = torch.device("cuda" if use_cuda else "cpu")
 
     tensor_x = torch.tensor(train_data.iloc[:, :].values, device=device)
-    tensor_y = torch.tensor(train_target.iloc[:, :].values, device=device)
+    tensor_y = torch.tensor(train_target.iloc[:, :].values,dtype=torch.long,  device=device)
 
 
-    test_tensor_x = torch.tensor(Train_featues.iloc[:, :].values, device=device)
-    test_tensor_y = torch.tensor(Test_features.iloc[:, :].values, dtype=torch.long)
+    # test_tensor_x = torch.tensor(Train_featues.iloc[:, :].values, device=device)
+    # test_tensor_y = torch.tensor(Test_features.iloc[:, :].values, dtype=torch.long)
 
     train_dataset = utils.TensorDataset(tensor_x, tensor_y)  # create your datset
     train_loader = utils.DataLoader(train_dataset, batch_size=batch_size)  # create your dataloader
 
-    test_dataset = utils.TensorDataset(test_tensor_x, test_tensor_y)  # create your datset
-    test_loader = utils.DataLoader(test_dataset)
+    # test_dataset = utils.TensorDataset(test_tensor_x, test_tensor_y)  # create your datset
+    # test_loader = utils.DataLoader(test_dataset)
 
-
-    model = SeqModel().to(device)
+    # print(train_data.shape)
+    # print(train_target.shape)
+    # breakpoint()
+    model = SeqModel(879, 206).to(device)
     optimizer = optim.Adam(model.parameters(), lr=learning_rate) #add weight decay?
 
     train_acc_list = []
@@ -143,9 +145,9 @@ def main():
         train_acc = train(model, device, train_loader, optimizer, epoch)
         train_acc_list.append(train_acc)
         print('\nTrain set Accuracy: {:.1f}%\n'.format(train_acc))
-        test_acc = test(model, device, test_loader)
-        print('\nTest set Accuracy: {:.1f}%\n'.format(test_acc))
-        test_acc_list.append(test_acc)
+        # test_acc = test(model, device, test_loader)
+        # print('\nTest set Accuracy: {:.1f}%\n'.format(test_acc))
+        # test_acc_list.append(test_acc)
 
 
 
