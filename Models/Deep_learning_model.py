@@ -75,20 +75,20 @@ def train(model, device, train_loader, optimizer, epoch):
         if batch_idx % 100 == 0: #Print loss every 100 batch
             print('Train Epoch: {}\tLoss: {:.6f}'.format(
                 epoch, loss.item()))
-    Loss = test(model, device, train_loader)
+    Loss = test_mdl(model, device, train_loader)
     return Loss
 
-def test(model, device, test_loader):
+def test_mdl(model, device, test_loader):
     model.eval()
-    Final_loss = 0
+    loss_arr = []
     with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
             loss = nn.BCEWithLogitsLoss()(output, target)
-            Final_loss += loss.item()
+            loss_arr.append(loss.item())
 
-    return Final_loss/ len(test_loader)
+    return np.mean(loss_arr)
 
 
 def main():
@@ -134,7 +134,7 @@ def main():
         train_loss = train(model, device, train_loader, optimizer, epoch)
         train_Loss_list.append(train_loss)
         print('\nTrain set Loss: {:.1f}%\n'.format(train_loss))
-        test_loss = test(model, device, test_loader)
+        test_loss = test_mdl(model, device, test_loader)
         print('\nTest set Loss: {:.1f}%\n'.format(test_loss))
         test_Loss_list.append(test_loss)
 
