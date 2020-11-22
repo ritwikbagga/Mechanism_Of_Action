@@ -142,9 +142,7 @@ def main():
     test_dataset = utils.TensorDataset(test_tensor_x, test_tensor_y)  # create your datset
     test_loader = utils.DataLoader(test_dataset, batch_size=batch_size, drop_last=True)
 
-    # print(train_data.shape)
-    # print(train_target.shape)
-    # breakpoint()
+
     model = SeqModel(879, 206, batch_size)
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
