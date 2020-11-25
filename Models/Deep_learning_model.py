@@ -1,14 +1,14 @@
-from _future_ import print_function
+from __future__ import print_function
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from torchvision import datasets, transforms
+# from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
 import numpy as np
 import torch.utils.data as utils
 import pandas as pd
-from sklearn.model_selection import  train_test_split as train_test_split
+from sklearn.model_selection import train_test_split as train_test_split
 
 
 def load_data():
@@ -116,7 +116,6 @@ def tune_model(params, device, train_loader, epochs):
 
 
 def main():
-
     Train_featues, Train_targets_scored, Test_features = load_data()
     Train_targets_scored= Train_targets_scored.drop("sig_id" , axis= 1)   #shape (23814,207 )
     Train_featues = preprocess(Train_featues)      # shape (23814, 880)
@@ -147,26 +146,26 @@ def main():
 
    #Hyper parameter tuning
 
-#     params = {
+    # params = {
+    #
+    #     "learning_rate": [ 10e-2, 10e-3, 10e-4 , 10e-5],
+    #     "Hidden_layer_size": np.linspace(16, 2048, 3, dtype=int),
+    #     "Dropout": [0.1 , 0.2 , 0.3 , 0.4 , 0.5 , 0.6 , 0.7 ,0.8],
+    #     "total_layers":[ 1,2,3,4,5,6]
+    # }
+    # parameter_list = []
+    # for lr in params["learning_rate"]:
+    #     for hls in params["Hidden_layer_size"]:
+    #         for Dropout in params["Dropout"]:
+    #             for total_layers in params["total_layers"]:
+    #                 parameter_list.append({"learning_rate": lr, "Hidden_layer_size": hls, "Dropout": Dropout, "total_layers":total_layers})
+    # for parameters in parameter_list:
+    #     tune_model(parameters, device, train_loader, epochs=10)  #Training best =  (0.017691294973095257, {'lr': 1e-06, 'hidden_layer_size': 1032, 'dropout': 0.1})
+    #
+    #
+    # list_loss_params = sorted( loss_and_params  , key =  lambda x :x[0] ) # sorting the list of (loss, params)
+    # print(list_loss_params[:5])
 
-#         "learning_rate": [ 10e-2, 10e-3, 10e-4 , 10e-5],
-#         "Hidden_layer_size": np.linspace(16, 2048, 3, dtype=int),
-#         "Dropout": [0.1 , 0.2 , 0.3 , 0.4 , 0.5 , 0.6 , 0.7 ,0.8],
-#         "total_layers":[ 1,2,3,4,5,6]
-#     }
-#     parameter_list = []
-#     for lr in params["learning_rate"]:
-#         for hls in params["Hidden_layer_size"]:
-#             for Dropout in params["Dropout"]:
-#                 for total_layers in params["total_layers"]:
-#                     parameter_list.append({"learning_rate": lr, "Hidden_layer_size": hls, "Dropout": Dropout, "total_layers":total_layers})
-#     for parameters in parameter_list:
-#         tune_model(parameters, device, train_loader, epochs=10)  #Training best =  (0.017691294973095257, {'lr': 1e-06, 'hidden_layer_size': 1032, 'dropout': 0.1})
-
-
-#     list_loss_params = sorted( loss_and_params  , key =  lambda x :x[0] ) # sorting the list of (loss, params)
-#     print(list_loss_params[:5])
-#     breakpoint()
 
 
 
@@ -211,5 +210,5 @@ def main():
 
 
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     main()
