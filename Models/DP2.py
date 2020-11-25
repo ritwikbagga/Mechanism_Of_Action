@@ -42,26 +42,21 @@ def preprocess(Data):
 
 class SeqModel(nn.Module):
 
-    def __init__(self, num_features, num_targets, batch_size, dropout):
-        self.layer1_size = 256
-        self.layer2_size = 128
+    def __init__(self, num_features, num_targets, batch_size):
         super().__init__()
+        self.layer1_size = 256
+        self.layer2_size = 256
 
         self.num_features = num_features
         self.num_targets = num_targets
         self.batch_size = batch_size
         self.layer1 = nn.Linear(num_features, self.layer1_size)
         self.norm = nn.BatchNorm1d(self.layer1_size)
-        self.drop1 = nn.Dropout(dropout)
-        self.prelu = nn.PReLU()
-
-        #         self.conv2d = nn.Conv2d(1, 1, kernel_size=(2, 1), stride=(2, 1))
-        #         self.drop2d = nn.Dropout2d(0.5)
-        #         self.flatten = nn.Flatten()
-
+        self.drop1 = nn.Dropout(0.5)
+        self.prelu = nn.ReLU()
         self.hiddenlinear = nn.Linear(self.layer1_size, self.layer2_size)
         self.norm2 = nn.BatchNorm1d(self.layer2_size)
-        self.dropout2 = nn.Dropout(dropout)
+        self.dropout2 = nn.Dropout(0.5)
         self.final = nn.Linear(self.layer2_size, num_targets)
 
     def forward(self, x):
@@ -69,12 +64,6 @@ class SeqModel(nn.Module):
         x = self.norm(x)
         x = self.drop1(x)
         x = self.prelu(x)
-
-        #         x = self.conv2d(x.view(self.batch_size, 1, 32, 16))
-        #         x = self.prelu(x)
-        #         x = self.drop2d(x)
-        #         x = self.flatten(x)
-
         x = self.hiddenlinear(x)
         x = self.norm2(x)
         x = self.dropout2(x)
@@ -91,6 +80,8 @@ def train_mdl(model, device, train_loader, optimizer, epoch):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
+        if batch_idx % 10 == 0:
+            print(output)
         loss = nn.BCEWithLogitsLoss()(output, target)
         loss.backward()
         optimizer.step()
@@ -117,21 +108,27 @@ def test_mdl(model, device, test_loader):
 
 def main():
     Train_featues, Train_targets_scored, Test_features = load_data()
+    print(Train_featues.shape)
     Train_targets_scored = Train_targets_scored.drop("sig_id", axis=1)  # shape (23814,207 )
     Train_featues = preprocess(Train_featues)  # shape (23814, 880)
+    print(Train_featues.shape)
+
+    print(Test_features.shape)
     Test_features = preprocess(Test_features)
+    print(Test_features.shape)
 
     train_data, valid_data, train_target, valid_target = train_test_split(Train_featues, Train_targets_scored,
                                                                           test_size=0.1, random_state=42)
 
-    use_cuda = False
+    use_cuda = True
     learning_rate = 0.01
-    NumEpochs = 20
-    batch_size = 64
+    NumEpochs = 10
+    batch_size = 1024
     device = torch.device("cuda" if use_cuda else "cpu")
 
     tensor_x = torch.tensor(train_data.iloc[:, :].values, dtype=torch.float, device=device)
     tensor_y = torch.tensor(train_target.iloc[:, :].values, dtype=torch.float, device=device)
+    tensor_submit = torch.tensor(Test_features.iloc[:, :].values, dtype=torch.float, device=device)
 
     test_tensor_x = torch.tensor(valid_data.iloc[:, :].values, dtype=torch.float, device=device)
     test_tensor_y = torch.tensor(valid_target.iloc[:, :].values, dtype=torch.float)
@@ -145,14 +142,14 @@ def main():
     # print(train_data.shape)
     # print(train_target.shape)
     # breakpoint()
-    model = SeqModel(879, 206, batch_size)
+    model = SeqModel(879, 206, batch_size)  # 879 -> 876
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
         # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
         model = nn.DataParallel(model)
 
     model.to(device)
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.0001)  # add weight decay?
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)  # add weight decay?
     #     optimizer = torch.optim.Adadelta(model.parameters(), lr=10, rho=0.9, eps=1e-06, weight_decay=0.01)
     train_Loss_list = []
     test_Loss_list = []
@@ -174,6 +171,8 @@ def main():
     plt.xlabel("Number of Epochs")
     plt.legend(loc=0)
     plt.show()
+
+    return model, tensor_submit, Test_features
 
 
 if __name__ == '__main__':

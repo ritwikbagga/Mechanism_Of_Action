@@ -27,16 +27,16 @@ mdl = [
 (MultiOutputClassifier(LinearDiscriminantAnalysis(solver='lsqr')), "MultiOutputClassifier(LinearDiscriminantAnalysis(solver='lsqr'))"), #0.3xx
 
 
-#(MultiOutputClassifier(LinearDiscriminantAnalysis(solver='eigen')), "MultiOutputClassifier(LinearDiscriminantAnalysis(solver='eigen'))"), # 0.3xx
-#  MultiOutputClassifier(SVC()), # 0.4005246444843297
-#  MultiOutputClassifier(AdaBoostClassifier(DecisionTreeClassifier(max_depth=5), n_estimators=10, learning_rate=2)),
-#  MultiOutputClassifier(AdaBoostClassifier(RandomForestClassifier())), # 0.40204335220212617
-#  MultiOutputClassifier(GaussianNB()),
-# ClassifierChain(GaussianNB()), #0.0009664503658704957
-# #ClassifierChain(SGDClassifier(loss='perceptron')),
-# ClassifierChain(KNeighborsClassifier()),
-# ClassifierChain(DecisionTreeClassifier(max_depth=10)), #ACC: 0.3296976390998205,  mean(loss**2) = 0.00177
-# ClassifierChain(AdaBoostClassifier(DecisionTreeClassifier(max_depth=5)))
+(MultiOutputClassifier(LinearDiscriminantAnalysis(solver='eigen')), "MultiOutputClassifier(LinearDiscriminantAnalysis(solver='eigen'))"), # 0.3xx
+ MultiOutputClassifier(SVC()), # 0.4005246444843297
+ MultiOutputClassifier(AdaBoostClassifier(DecisionTreeClassifier(max_depth=5), n_estimators=10, learning_rate=2)),
+ MultiOutputClassifier(AdaBoostClassifier(RandomForestClassifier())), # 0.40204335220212617
+ MultiOutputClassifier(GaussianNB()),
+ClassifierChain(GaussianNB()), #0.0009664503658704957
+#ClassifierChain(SGDClassifier(loss='perceptron')),
+ClassifierChain(KNeighborsClassifier()),
+ClassifierChain(DecisionTreeClassifier(max_depth=10)), #ACC: 0.3296976390998205,  mean(loss**2) = 0.00177
+ClassifierChain(AdaBoostClassifier(DecisionTreeClassifier(max_depth=5)))
 ]
 
 
